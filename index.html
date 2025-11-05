@@ -3,87 +3,172 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>你画我猜 - 小伙伴聚会神器</title>
+    <title>RPA智能脚本生成器 - AI驱动的自动化工具</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header class="top-bar">
-      <h1>你画我猜</h1>
-      <button id="new-round" class="primary">开始新回合</button>
+      <h1>🤖 RPA智能脚本生成器</h1>
+      <div class="header-actions">
+        <button id="new-project" class="primary">新建项目</button>
+        <button id="export-script" class="secondary">导出脚本</button>
+      </div>
     </header>
 
     <main class="layout">
-      <section class="canvas-panel">
-        <div class="canvas-wrapper">
-          <canvas id="board" width="800" height="520"></canvas>
+      <section class="main-panel">
+        <div class="project-info card">
+          <h2>项目信息</h2>
+          <div class="form-group">
+            <label for="project-name">项目名称</label>
+            <input type="text" id="project-name" placeholder="例如：自动填写表单" />
+          </div>
+          <div class="form-group">
+            <label for="project-desc">项目描述</label>
+            <textarea id="project-desc" rows="2" placeholder="简要描述自动化流程的目的"></textarea>
+          </div>
         </div>
 
-        <div class="toolbar">
-          <div class="tool-group">
-            <span class="label">画笔颜色</span>
-            <div class="color-palette" id="color-palette"></div>
+        <div class="steps-container card">
+          <div class="card-header">
+            <h2>自动化步骤配置</h2>
+            <button id="add-step" class="primary-small">+ 添加步骤</button>
           </div>
-
-          <div class="tool-group">
-            <label for="brush-size" class="label">画笔粗细</label>
-            <input type="range" id="brush-size" min="2" max="40" value="8" />
-            <span id="brush-size-value">8 px</span>
+          <div id="steps-list" class="steps-list">
+            <!-- Steps will be dynamically added here -->
           </div>
+        </div>
 
-          <div class="tool-group buttons">
-            <button id="eraser">橡皮擦</button>
-            <button id="clear" class="secondary">清空画板</button>
-            <button id="download">导出作品</button>
+        <div class="test-data card">
+          <h2>测试数据配置</h2>
+          <div class="form-group">
+            <label for="test-data-input">测试数据（JSON格式）</label>
+            <textarea id="test-data-input" rows="6" placeholder='例如：&#10;{&#10;  "username": "test_user",&#10;  "password": "test123",&#10;  "email": "test@example.com"&#10;}'></textarea>
+          </div>
+          <button id="validate-test-data" class="secondary">验证数据格式</button>
+          <div id="test-data-feedback" class="feedback"></div>
+        </div>
+
+        <div class="generation-section card">
+          <h2>脚本生成与测试</h2>
+          <div class="generation-controls">
+            <button id="generate-script" class="primary">🚀 生成自动化脚本</button>
+            <button id="run-test" class="secondary" disabled>▶️ 运行测试</button>
+            <button id="validate-ocr" class="secondary" disabled>🔍 OCR验证</button>
+          </div>
+          <div id="generation-status" class="status-panel"></div>
+          <div id="generation-progress" class="progress-container" style="display: none;">
+            <div class="progress-bar">
+              <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <p id="progress-text" class="progress-text"></p>
           </div>
         </div>
       </section>
 
       <aside class="side-panel">
-        <section class="card" id="word-card">
-          <h2>题目</h2>
-          <p id="word-display" class="word masked">点击“显示词语”查看</p>
-          <div class="card-actions">
-            <button id="toggle-word">显示词语</button>
-            <button id="shuffle-word">换一个</button>
+        <section class="card">
+          <h2>生成的脚本</h2>
+          <div id="script-preview" class="script-preview">
+            <code id="script-code">
+# 脚本将在这里显示
+# 点击【生成自动化脚本】开始
+            </code>
+          </div>
+          <div class="script-actions">
+            <button id="copy-script" class="secondary" disabled>复制脚本</button>
+            <button id="download-script" class="secondary" disabled>下载脚本</button>
           </div>
         </section>
 
         <section class="card">
-          <h2>倒计时</h2>
-          <div class="timer"> <span id="timer-display">01:30</span> </div>
-          <div class="timer-controls">
-            <button id="start-timer" class="primary">开始</button>
-            <button id="pause-timer">暂停</button>
-            <button id="reset-timer">重置</button>
-            <label class="timer-label">
-              自定义秒数
-              <input type="number" id="timer-input" min="10" max="600" step="10" value="90" />
-            </label>
+          <h2>OCR验证结果</h2>
+          <div id="ocr-results" class="ocr-results">
+            <p class="placeholder-text">运行OCR验证后，结果将在这里显示</p>
           </div>
         </section>
 
         <section class="card">
-          <h2>猜词区</h2>
-          <div class="guess-box">
-            <input type="text" id="guess-input" placeholder="输入你的答案" />
-            <button id="submit-guess">提交猜测</button>
+          <h2>测试日志</h2>
+          <div id="test-logs" class="test-logs">
+            <p class="placeholder-text">测试日志将在这里显示</p>
           </div>
-          <p id="guess-feedback" class="feedback"></p>
         </section>
 
         <section class="card instructions">
-          <h2>游戏规则</h2>
+          <h2>使用说明</h2>
           <ol>
-            <li>点击“开始新回合”随机抽取一个词语，画手点击“显示词语”查看。</li>
-            <li>画手使用画板绘制线索，其余玩家猜测词语。</li>
-            <li>猜中后点击“开始新回合”进入下一轮。</li>
-            <li>需要灵感时可以点击“换一个”重新抽词。</li>
+            <li>填写项目名称和描述</li>
+            <li>添加自动化步骤，每步配置操作类型和参数</li>
+            <li>为每个步骤上传参考截图</li>
+            <li>配置测试数据（JSON格式）</li>
+            <li>点击"生成自动化脚本"，AI将生成Python脚本</li>
+            <li>系统自动运行测试并通过OCR验证每步执行结果</li>
+            <li>验证成功后，导出脚本到本地使用</li>
           </ol>
         </section>
       </aside>
     </main>
 
-    <footer class="footer">祝大家玩得开心！</footer>
+    <!-- Step Modal -->
+    <div id="step-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title">配置步骤</h3>
+          <button id="close-modal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="step-name">步骤名称</label>
+            <input type="text" id="step-name" placeholder="例如：打开登录页面" />
+          </div>
+          
+          <div class="form-group">
+            <label for="step-action">操作类型</label>
+            <select id="step-action">
+              <option value="">请选择操作类型</option>
+              <option value="navigate">打开网页</option>
+              <option value="click">点击元素</option>
+              <option value="input">输入文本</option>
+              <option value="select">选择下拉列表</option>
+              <option value="wait">等待</option>
+              <option value="screenshot">截图</option>
+              <option value="scroll">滚动</option>
+              <option value="hover">鼠标悬停</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="target-group">
+            <label for="step-target">目标元素/URL</label>
+            <input type="text" id="step-target" placeholder="例如：https://example.com 或 #login-button" />
+          </div>
+
+          <div class="form-group" id="value-group" style="display: none;">
+            <label for="step-value">输入值</label>
+            <input type="text" id="step-value" placeholder="输入文本内容或选择器" />
+          </div>
+
+          <div class="form-group">
+            <label for="step-screenshot">参考截图</label>
+            <input type="file" id="step-screenshot" accept="image/*" />
+            <div id="screenshot-preview" class="screenshot-preview"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="step-notes">备注说明</label>
+            <textarea id="step-notes" rows="2" placeholder="选填：添加步骤说明"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancel-step" class="secondary">取消</button>
+          <button id="save-step" class="primary">保存步骤</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>AI驱动的RPA自动化脚本生成器 | 支持OCR验证 | 一键生成Python自动化脚本</p>
+    </footer>
 
     <script src="app.js"></script>
   </body>
