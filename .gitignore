@@ -16,6 +16,8 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+dist/
+build/
 
 # Python
 __pycache__/
@@ -23,12 +25,40 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-.env
 venv/
 ENV/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Uploads and generated files
+server/uploads/
+server/generated-scripts/
+server/logs/
+screenshots/
 
 # Editor directories and files
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# Docker
+.docker/
+
+# Database
+*.sqlite
+*.db
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+.cache/
+temp/
+tmp/

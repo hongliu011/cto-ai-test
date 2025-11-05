@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: rpa-postgres
+    environment:
+      POSTGRES_DB: rpa_platform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - rpa-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: rpa-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - rpa-network
+
+  ocr-service:
+    image: paddleocr/paddleocr:latest-cpu
+    container_name: rpa-ocr
+    ports:
+      - "8000:8000"
+    environment:
+      - LANG=ch
+    networks:
+      - rpa-network
+    command: paddleocr_server
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: rpa-server
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=rpa_platform
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - OCR_SERVICE_URL=http://ocr-service:8000
+    depends_on:
+      - postgres
+      - redis
+      - ocr-service
+    volumes:
+      - ./server/uploads:/app/uploads
+      - ./server/generated-scripts:/app/generated-scripts
+      - ./server/logs:/app/logs
+    networks:
+      - rpa-network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: rpa-client
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    networks:
+      - rpa-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  rpa-network:
+    driver: bridge
